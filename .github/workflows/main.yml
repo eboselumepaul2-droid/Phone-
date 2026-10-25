@@ -1,0 +1,33 @@
+
+name: Build NUM-X APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download project files
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Build Android APK
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload NUM-X APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: NUM-X-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
