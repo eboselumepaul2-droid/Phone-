@@ -1,4 +1,5 @@
 
+name: 
 name: Build NUM-X APK
 
 on:
@@ -12,8 +13,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download project files
+      - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Extract NUM-X project
+        run: |
+          unzip -q NUM-X-Android-Project.zip -d numx-project
+          cd numx-project
+          test -f app/build.gradle
+          test -f app/src/main/AndroidManifest.xml
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -21,13 +29,19 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Build Android APK
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Build debug APK
+        working-directory: numx-project
+        run: gradle assembleDebug
 
       - name: Upload NUM-X APK
         uses: actions/upload-artifact@v4
         with:
-          name: NUM-X-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: NUM-X-APK
+          path: numx-project/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          
